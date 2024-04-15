@@ -1,0 +1,79 @@
+scalar Date
+
+enum ArtistType {
+  Person
+  Group
+  Orchestra
+  Choir
+  Character
+  Other
+}
+
+enum ReleaseStatus {
+  Official
+  Promotion
+  Bootleg
+  PseudoRelease
+  Withdrawn
+  Cancelled
+  Unknown
+}
+
+type Recording {
+  id: String!
+  title: String!
+  durationMs: Int!
+  artists: [RecordingArtistCredit!]!
+  releases: [RecordingRelease!]!
+  firstReleaseDate: Date
+}
+
+type RecordingArtistCredit {
+  name: String!
+  artist: RecordingArtist!
+  joinOn: String
+}
+
+type RecordingArtist {
+  id: String!
+  name: String!
+  sortName: String!
+}
+
+type RecordingRelease {
+  id: String!
+  title: String!
+  coverUrl: String!
+  status: ReleaseStatus!
+  artists: [RecordingReleaseArtistCredit!]!
+  date: Date
+}
+
+type RecordingReleaseArtistCredit {
+  name: String!
+  artist: RecordingReleaseArtist!
+  joinOn: String
+}
+
+type RecordingReleaseArtist {
+  id: String!
+  name: String!
+  sortName: String!
+}
+
+input SearchRecordingsInput {
+  query: String!
+}
+
+type Query {
+  searchRecordings(input: SearchRecordingsInput!): [Recording!]!
+}
+
+type Mutation {
+  helloWorld: String
+}
+
+schema {
+  query: Query
+  mutation: Mutation
+}
