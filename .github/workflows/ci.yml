@@ -6,7 +6,7 @@ on:
 jobs:
   image:
     runs-on: ubuntu-latest
-    if: ${{ success() && github.ref == 'refs/heads/master' }}
+    if: ${{ success() && github.ref == 'refs/heads/main' }}
 
     steps:
       - uses: actions/checkout@v2
