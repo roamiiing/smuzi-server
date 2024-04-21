@@ -30,16 +30,16 @@ const schema = createSchema({
               /[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g,
               "\\$&",
             );
-            const joined = escaped.split(" ").join(" * ");
-            return joined;
+            return escaped;
           };
-          const escapedQuery = escapeLucene(input.query);
-          const processedQuery = `"${escapedQuery}"~0.9 AND "${escapedQuery}"~7`;
+          const processedQuery = input.query
+            .split(" ")
+            .map(escapeLucene)
+            .map((a) => `${a}* OR artist:${a}*`)
+            .join(" OR ");
 
           const recordingsDto =
             await musicBrainzClient.getRecordings(processedQuery);
-
-          console.log(JSON.stringify(recordingsDto, null, 2));
 
           return recordingsDto.recordings.map((recordingDto) => ({
             id: recordingDto.id,
