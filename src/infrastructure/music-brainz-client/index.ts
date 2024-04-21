@@ -105,6 +105,11 @@ export class MusicBrainzClient {
 
     const response = await fetch(
       `${this.baseUrl}${MUSIC_BRAINZ_RECORDINGS_URL}?${queryParams}`,
+      {
+        headers: {
+          "User-Agent": "smuzi-server/0.0.1 (insecure.boxxx+smuzi@gmail.com)",
+        },
+      },
     );
 
     return await response.json();
