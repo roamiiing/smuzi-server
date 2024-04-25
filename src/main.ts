@@ -3,28 +3,72 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { createSchema, createYoga } from "graphql-yoga";
 import {
-  Recording,
+  PlayRecordingInput,
+  PlayRecordingResult,
   ReleaseStatus,
   SearchRecordingsInput,
+  SearchRecordingsResult,
 } from "./infrastructure/generated/graphql/types";
 import { MusicBrainzClient } from "./infrastructure/music-brainz-client";
+import {
+  getFullTrackName,
+  mapRecording,
+} from "./infrastructure/music-brainz-client/mappers";
+import { getRelevantAudioUrl } from "./infrastructure/youtube-search-client";
 
 const typeDefs = readFileSync(
   resolve(__dirname, "../schema/graphql/schema.graphql"),
   "utf-8",
 );
 
+const musicBrainzClient = new MusicBrainzClient();
+
 const schema = createSchema({
   typeDefs,
   resolvers: {
     Query: {
+      async playRecording(
+        _,
+        { input }: { input: PlayRecordingInput },
+      ): Promise<PlayRecordingResult> {
+        const recordingDto = await musicBrainzClient.getRecordingById(
+          input.recordingId,
+        );
+
+        const recording = mapRecording(recordingDto);
+
+        const fullTrackName = getFullTrackName(recording);
+
+        const relevantInfo = await getRelevantAudioUrl(
+          fullTrackName,
+          recording.durationMs,
+        );
+
+        if (!relevantInfo) {
+          throw new Error("Failed to find relevant audio");
+        }
+
+        const { url, duration: durationMs } = relevantInfo;
+
+        const restreamServicePayload = {
+          source: "youtube",
+          url,
+        };
+
+        const restreamUrl = `https://re.x.talkiiing.ru/${recording.id}.webm?p=${btoa(JSON.stringify(restreamServicePayload))}`;
+
+        return {
+          recording,
+          streamUrl: restreamUrl,
+          durationMs,
+        };
+      },
       async searchRecordings(
         _,
         { input }: { input: SearchRecordingsInput },
-      ): Promise<Recording[]> {
+      ): Promise<SearchRecordingsResult> {
         console.log(input);
         try {
-          const musicBrainzClient = new MusicBrainzClient();
           const escapeLucene = (input: string) => {
             const escaped = input.replace(
               /[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g,
@@ -41,59 +85,12 @@ const schema = createSchema({
           const recordingsDto =
             await musicBrainzClient.getRecordings(processedQuery);
 
-          return recordingsDto.recordings.map((recordingDto) => ({
-            id: recordingDto.id,
-            title: recordingDto.title,
-            durationMs: recordingDto.length ?? 0,
-            firstReleaseDate: recordingDto["first-release-date"],
-            releases:
-              recordingDto.releases?.map((releaseDto) => ({
-                id: releaseDto.id,
-                title: releaseDto.title,
-                coverUrl: `https://coverartarchive.org/release/${releaseDto.id}/front`,
-                status:
-                  {
-                    Official: ReleaseStatus.Official,
-                    Promotion: ReleaseStatus.Promotion,
-                    Bootleg: ReleaseStatus.Bootleg,
-                    Withdrawn: ReleaseStatus.Withdrawn,
-                    PseudoRelease: ReleaseStatus.PseudoRelease,
-                    Cancelled: ReleaseStatus.Cancelled,
-                    "": ReleaseStatus.Unknown,
-                  }[releaseDto.status ?? ""] ?? ReleaseStatus.Unknown,
-                artists:
-                  releaseDto["artist-credit"]?.map((artistCreditDto) => ({
-                    name: artistCreditDto.name ?? "Неизвестен",
-                    artist: {
-                      id: artistCreditDto.artist.id,
-                      name: artistCreditDto.artist.name ?? "Неизвестен",
-                      sortName:
-                        artistCreditDto.artist["sort-name"] ??
-                        artistCreditDto.artist.name,
-                    },
-                    joinOn: artistCreditDto.joinphrase,
-                  })) ?? [],
-                date: releaseDto.date,
-              })) ?? [],
-            artists:
-              recordingDto["artist-credit"]?.map((artistCreditDto) => ({
-                name:
-                  artistCreditDto.name ??
-                  artistCreditDto.artist.name ??
-                  "Неизвестен",
-                artist: {
-                  id: artistCreditDto.artist.id,
-                  name: artistCreditDto.artist.name ?? "Неизвестен",
-                  sortName:
-                    artistCreditDto.artist["sort-name"] ??
-                    artistCreditDto.artist.name,
-                },
-                joinOn: artistCreditDto.joinphrase,
-              })) ?? [],
-          }));
+          return {
+            recordings: recordingsDto.recordings.map(mapRecording),
+          };
         } catch (e) {
           console.error(e);
-          return [];
+          return { recordings: [] };
         }
       },
     },

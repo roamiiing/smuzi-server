@@ -29,9 +29,31 @@ export type Mutation = {
   helloWorld?: Maybe<Scalars['String']['output']>;
 };
 
+export type PlayRecordingInput = {
+  recordingId: Scalars['String']['input'];
+};
+
+export type PlayRecordingResult = {
+  __typename?: 'PlayRecordingResult';
+  /** The actual length of the stream in milliseconds */
+  durationMs: Scalars['Int']['output'];
+  /** The recording that was played */
+  recording: Recording;
+  /** The URL of the stream that was played */
+  streamUrl: Scalars['String']['output'];
+};
+
 export type Query = {
   __typename?: 'Query';
-  searchRecordings: Array<Recording>;
+  /** Retrieve a URL to stream a recording */
+  playRecording: PlayRecordingResult;
+  /** Search for recordings */
+  searchRecordings: SearchRecordingsResult;
+};
+
+
+export type QueryPlayRecordingArgs = {
+  input: PlayRecordingInput;
 };
 
 
@@ -99,4 +121,9 @@ export enum ReleaseStatus {
 
 export type SearchRecordingsInput = {
   query: Scalars['String']['input'];
+};
+
+export type SearchRecordingsResult = {
+  __typename?: 'SearchRecordingsResult';
+  recordings: Array<Recording>;
 };

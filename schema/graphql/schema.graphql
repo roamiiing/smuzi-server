@@ -65,8 +65,38 @@ input SearchRecordingsInput {
   query: String!
 }
 
+type SearchRecordingsResult {
+  recordings: [Recording!]!
+}
+
+input PlayRecordingInput {
+  recordingId: String!
+}
+
+type PlayRecordingResult {
+  """
+  The recording that was played
+  """
+  recording: Recording!
+  """
+  The URL of the stream that was played
+  """
+  streamUrl: String!
+  """
+  The actual length of the stream in milliseconds
+  """
+  durationMs: Int!
+}
+
 type Query {
-  searchRecordings(input: SearchRecordingsInput!): [Recording!]!
+  """
+  Search for recordings
+  """
+  searchRecordings(input: SearchRecordingsInput!): SearchRecordingsResult!
+  """
+  Retrieve a URL to stream a recording
+  """
+  playRecording(input: PlayRecordingInput!): PlayRecordingResult!
 }
 
 type Mutation {
