@@ -49,17 +49,17 @@ const schema = createSchema({
         }
 
         const { url, duration: durationMs } = relevantInfo;
-
-        const restreamServicePayload = {
-          source: "youtube",
-          url,
-        };
-
-        const restreamUrl = `https://re.x.talkiiing.ru/${recording.id}.webm?p=${btoa(JSON.stringify(restreamServicePayload))}`;
-
+        //
+        // const restreamServicePayload = {
+        //   source: "youtube",
+        //   url,
+        // };
+        //
+        // const restreamUrl = `https://re.x.talkiiing.ru/${recording.id}.webm?p=${btoa(JSON.stringify(restreamServicePayload))}`;
+        //
         return {
           recording,
-          streamUrl: restreamUrl,
+          streamUrl: url,
           durationMs,
         };
       },
