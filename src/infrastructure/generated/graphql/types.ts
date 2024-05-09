@@ -64,6 +64,11 @@ export type QuerySearchRecordingsArgs = {
 export type Recording = {
   __typename?: 'Recording';
   artists: Array<RecordingArtistCredit>;
+  /**
+   * Url template for the cover image. Add {size} to the end of the url to get a specific size.
+   * Available sizes: 250, 500, 1500
+   */
+  coverUrl?: Maybe<Scalars['String']['output']>;
   durationMs: Scalars['Int']['output'];
   firstReleaseDate?: Maybe<Scalars['Date']['output']>;
   id: Scalars['String']['output'];

@@ -5,6 +5,7 @@ import { createSchema, createYoga } from "graphql-yoga";
 import {
   PlayRecordingInput,
   PlayRecordingResult,
+  RecordingRelease,
   ReleaseStatus,
   SearchRecordingsInput,
   SearchRecordingsResult,
@@ -49,14 +50,7 @@ const schema = createSchema({
         }
 
         const { url, duration: durationMs } = relevantInfo;
-        //
-        // const restreamServicePayload = {
-        //   source: "youtube",
-        //   url,
-        // };
-        //
-        // const restreamUrl = `https://re.x.talkiiing.ru/${recording.id}.webm?p=${btoa(JSON.stringify(restreamServicePayload))}`;
-        //
+
         return {
           recording,
           streamUrl: url,
@@ -77,9 +71,11 @@ const schema = createSchema({
             return escaped;
           };
           const processedQuery = input.query
-            .split(" ")
+            .trim()
+            .split(/\s+/g)
+            .filter((word) => word.length > 0)
             .map(escapeLucene)
-            .map((a) => `${a}* OR artist:${a}*`)
+            .map((word) => `${word}* OR artist:${word}*`)
             .join(" OR ");
 
           const recordingsDto =

@@ -25,6 +25,11 @@ type Recording {
   durationMs: Int!
   artists: [RecordingArtistCredit!]!
   releases: [RecordingRelease!]!
+  """
+  Url template for the cover image. Add `-250`, `-500` or `-1500`
+  to the end of the url to get a specific size.
+  """
+  coverUrl: String
   firstReleaseDate: Date
 }
 
