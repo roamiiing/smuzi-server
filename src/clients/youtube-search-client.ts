@@ -1,6 +1,8 @@
 import jsdom from "jsdom";
 import { getInfo } from "ytdl-core";
-import { createFakeHeaders } from "../../shared/fake-headers";
+import { createFakeHeaders } from "../shared/fake-headers";
+import { Cache } from "../cache/cache";
+import { HOURS } from "../shared/units";
 
 const YOUTUBE_SEARCH_URL = "https://youtube.com/results";
 const YOUTUBE_HEADERS = {
@@ -47,7 +49,7 @@ const getYoutubeSearchResultsPage = async (query: string) => {
   return await response.text();
 };
 
-export const getYoutubeSearchResults = (html: string) => {
+const getYoutubeSearchResults = (html: string) => {
   const doc = new jsdom.JSDOM(html);
 
   if (!doc) {
@@ -143,7 +145,7 @@ export type RelevantAudioInfo = {
   duration: number;
 };
 
-export const getRelevantAudioUrl = async (
+const getRelevantAudioUrl = async (
   query: string,
   durationMs: number,
 ): Promise<RelevantAudioInfo | null> => {
@@ -188,6 +190,40 @@ export const getRelevantAudioUrl = async (
 
   return { url: (neededFormat as any).url, duration };
 };
+
+export const enum YoutubeSearchClientCacheKey {
+  GetRelevantAudioUrl = "YouTubeSearchClient_GetRelevantAudioUrl",
+}
+
+export const YOUTUBE_SEARCH_CLIENT_CACHE_KEYS: ReadonlyArray<YoutubeSearchClientCacheKey> =
+  [YoutubeSearchClientCacheKey.GetRelevantAudioUrl];
+
+export type YoutubeSearchClientInput = {
+  query: string;
+  durationMs: number;
+};
+
+export type YoutubeSearchClientDeps = {
+  metaCache: Cache;
+};
+
+export class YoutubeSearchClient {
+  constructor(private readonly deps: YoutubeSearchClientDeps) {
+    this.getRelevantAudioUrl = this.deps.metaCache.memoized(
+      YoutubeSearchClientCacheKey.GetRelevantAudioUrl,
+      this.getRelevantAudioUrl.bind(this),
+      {
+        ttl: 6 * HOURS,
+      },
+    );
+  }
+
+  async getRelevantAudioUrl(
+    input: YoutubeSearchClientInput,
+  ): Promise<RelevantAudioInfo | null> {
+    return await getRelevantAudioUrl(input.query, input.durationMs);
+  }
+}
 
 if (require.main === module) {
   getRelevantAudioUrl("bones hdmi", 137000).then(console.log);

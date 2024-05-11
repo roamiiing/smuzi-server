@@ -2,6 +2,6 @@ schema:
   - ./schema/graphql/schema.graphql
 
 generates:
-  src/infrastructure/generated/graphql/types.ts:
+  src/generated/graphql/types.ts:
     plugins:
       - typescript

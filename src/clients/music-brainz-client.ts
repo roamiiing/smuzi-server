@@ -1,3 +1,6 @@
+import { Cache } from "../cache/cache";
+import { DAYS } from "../shared/units";
+
 const MUSIC_BRAINZ_URL = "https://musicbrainz.eu/ws/2",
   MUSIC_BRAINZ_RECORDINGS_URL = "/recording",
   MUSIC_BRAINZ_BASE_SEARCH_PARAMS = {
@@ -98,11 +101,43 @@ export type RecordingsResponseDto = {
 
 export type RecordingResponseDto = RecordingDto;
 
+export const enum MusicBrainzClientCacheKey {
+  GetRecordingsByQuery = "MusicBrainzClient_GetRecordingsByQuery",
+  GetRecordingById = "MusicBrainzClient_GetRecordingById",
+}
+
+export const MUSIC_BRAINZ_CLIENT_CACHE_KEYS: ReadonlyArray<MusicBrainzClientCacheKey> =
+  [
+    MusicBrainzClientCacheKey.GetRecordingsByQuery,
+    MusicBrainzClientCacheKey.GetRecordingById,
+  ];
+
+export type MusicBrainzClientDeps = {
+  metaCache: Cache;
+};
+
 export class MusicBrainzClient {
-  constructor(
-    private readonly baseUrl = MUSIC_BRAINZ_URL,
-    private readonly userAgent = "smuzi-server/0.0.1 (insecure.boxxx+smuzi@gmail.com)",
-  ) {}
+  private readonly baseUrl = MUSIC_BRAINZ_URL;
+  private readonly userAgent =
+    "smuzi-server/0.0.1 (insecure.boxxx+smuzi@gmail.com)";
+
+  constructor(private readonly deps: MusicBrainzClientDeps) {
+    this.getRecordingById = this.deps.metaCache.memoized(
+      MusicBrainzClientCacheKey.GetRecordingById,
+      this.getRecordingById.bind(this),
+      {
+        ttl: Infinity,
+      },
+    );
+
+    this.getRecordingsByQuery = this.deps.metaCache.memoized(
+      MusicBrainzClientCacheKey.GetRecordingsByQuery,
+      this.getRecordingsByQuery.bind(this),
+      {
+        ttl: 12 * DAYS,
+      },
+    );
+  }
 
   private async request<T>(
     subUrl: string,
@@ -122,7 +157,7 @@ export class MusicBrainzClient {
     return await response.json();
   }
 
-  async getRecordings(query: string): Promise<RecordingsResponseDto> {
+  async getRecordingsByQuery(query: string): Promise<RecordingsResponseDto> {
     return await this.request<RecordingsResponseDto>(
       MUSIC_BRAINZ_RECORDINGS_URL,
       {

@@ -1,8 +1,10 @@
-version: "3.9"
-
 services:
-  app:
-    build:
-      context: .
+  mongodb:
+    image: mongo
     ports:
-      - 4000:4000
+      - 37017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - ./docker-data/mongodb:/data

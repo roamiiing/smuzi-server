@@ -65,8 +65,8 @@ export type Recording = {
   __typename?: 'Recording';
   artists: Array<RecordingArtistCredit>;
   /**
-   * Url template for the cover image. Add {size} to the end of the url to get a specific size.
-   * Available sizes: 250, 500, 1500
+   * Url template for the cover image. Add `-250`, `-500` or `-1500`
+   * to the end of the url to get a specific size.
    */
   coverUrl?: Maybe<Scalars['String']['output']>;
   durationMs: Scalars['Int']['output'];
