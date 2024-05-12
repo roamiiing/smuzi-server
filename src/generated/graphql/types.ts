@@ -15,6 +15,11 @@ export type Scalars = {
   Date: { input: any; output: any; }
 };
 
+export type AlreadyExistsError = {
+  __typename?: 'AlreadyExistsError';
+  message: Scalars['String']['output'];
+};
+
 export enum ArtistType {
   Character = 'Character',
   Choir = 'Choir',
@@ -24,9 +29,28 @@ export enum ArtistType {
   Person = 'Person'
 }
 
+export type GetMeResult = GetMeResultSuccess | UnauthenticatedError;
+
+export type GetMeResultSuccess = {
+  __typename?: 'GetMeResultSuccess';
+  me: Me;
+};
+
+export type Me = {
+  __typename?: 'Me';
+  id: Scalars['String']['output'];
+  username: Scalars['String']['output'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
-  helloWorld?: Maybe<Scalars['String']['output']>;
+  /** Sign up a new user */
+  signUpByPassword: SignUpByPasswordResult;
+};
+
+
+export type MutationSignUpByPasswordArgs = {
+  input: SignUpByPasswordInput;
 };
 
 export type PlayRecordingInput = {
@@ -45,6 +69,8 @@ export type PlayRecordingResult = {
 
 export type Query = {
   __typename?: 'Query';
+  /** Get the current user */
+  getMe?: Maybe<GetMeResult>;
   /** Retrieve a URL to stream a recording */
   playRecording: PlayRecordingResult;
   /** Search for recordings */
@@ -131,4 +157,32 @@ export type SearchRecordingsInput = {
 export type SearchRecordingsResult = {
   __typename?: 'SearchRecordingsResult';
   recordings: Array<Recording>;
+};
+
+export type SignUpByPasswordInput = {
+  password: Scalars['String']['input'];
+  username: Scalars['String']['input'];
+};
+
+export type SignUpByPasswordResult = AlreadyExistsError | SignUpByPasswordResultSuccess | ValidationErrors;
+
+export type SignUpByPasswordResultSuccess = {
+  __typename?: 'SignUpByPasswordResultSuccess';
+  me: Me;
+};
+
+export type UnauthenticatedError = {
+  __typename?: 'UnauthenticatedError';
+  message: Scalars['String']['output'];
+};
+
+export type ValidationError = {
+  __typename?: 'ValidationError';
+  field: Scalars['String']['output'];
+  message: Scalars['String']['output'];
+};
+
+export type ValidationErrors = {
+  __typename?: 'ValidationErrors';
+  errors: Array<ValidationError>;
 };

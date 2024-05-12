@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
+    "prisma:generate": "prisma generate --schema=schema/prisma/schema.prisma",
+    "prisma:migrate": "prisma migrate dev --schema=schema/prisma/schema.prisma",
     "devenv:start": "docker-compose up -d",
     "denenv:stop": "docker-compose down",
     "start": "node -r jiti/register -r dotenv/config ./src/main.ts",
@@ -18,15 +20,22 @@
     "jiti": "^1.21.0",
     "nodemon": "^3.1.0",
     "prettier": "^3.2.5",
+    "prettier-plugin-prisma": "^5.0.0",
+    "prisma": "^5.13.0",
     "typescript": "^5.4.4"
   },
   "dependencies": {
+    "@prisma/client": "^5.13.0",
+    "@whatwg-node/server-plugin-cookies": "^1.0.2",
+    "argon2": "^0.40.1",
     "awilix": "^10.0.2",
     "dotenv": "^16.4.5",
     "graphql": "^16.8.1",
     "graphql-yoga": "^5.3.0",
     "jsdom": "^24.0.0",
     "mongodb": "^6.6.1",
-    "ytdl-core": "^4.11.5"
+    "redis": "^4.6.13",
+    "ytdl-core": "^4.11.5",
+    "zod": "^3.23.8"
   }
 }

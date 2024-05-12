@@ -1,5 +1,22 @@
 scalar Date
 
+type ValidationError {
+  field: String!
+  message: String!
+}
+
+type ValidationErrors {
+  errors: [ValidationError!]!
+}
+
+type UnauthenticatedError {
+  message: String!
+}
+
+type AlreadyExistsError {
+  message: String!
+}
+
 enum ArtistType {
   Person
   Group
@@ -93,6 +110,31 @@ type PlayRecordingResult {
   durationMs: Int!
 }
 
+type Me {
+  id: String!
+  username: String!
+}
+
+input SignUpByPasswordInput {
+  username: String!
+  password: String!
+}
+
+type SignUpByPasswordResultSuccess {
+  me: Me!
+}
+
+union SignUpByPasswordResult =
+  | SignUpByPasswordResultSuccess
+  | ValidationErrors
+  | AlreadyExistsError
+
+type GetMeResultSuccess {
+  me: Me!
+}
+
+union GetMeResult = UnauthenticatedError | GetMeResultSuccess
+
 type Query {
   """
   Search for recordings
@@ -102,10 +144,17 @@ type Query {
   Retrieve a URL to stream a recording
   """
   playRecording(input: PlayRecordingInput!): PlayRecordingResult!
+  """
+  Get the current user
+  """
+  getMe: GetMeResult
 }
 
 type Mutation {
-  helloWorld: String
+  """
+  Sign up a new user
+  """
+  signUpByPassword(input: SignUpByPasswordInput!): SignUpByPasswordResult!
 }
 
 schema {

@@ -6,5 +6,20 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: password
-    volumes:
-      - ./docker-data/mongodb:/data
+    # volumes:
+    #   - ./docker-data/mongodb:/data
+
+  postgres:
+    image: postgres
+    ports:
+      - 35432:5432
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: password
+    # volumes:
+    #   - ./docker-data/postgres:/var/lib/postgresql/data
+
+  keydb:
+    image: eqalpha/keydb
+    ports:
+      - 36379:6379

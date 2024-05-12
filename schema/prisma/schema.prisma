@@ -1,0 +1,73 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRESQL_CONNECTION_STRING")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id       String @id @default(uuid())
+  username String @unique
+
+  authSource String
+  authParams Json
+
+  playlists Playlist[] @relation("UserPlaylists")
+
+  friendshipsOut Friendship[] @relation("UserFriendshipsOut")
+  friendshipsIn  Friendship[] @relation("UserFriendshipsIn")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum PlaylistType {
+  Playlist
+  Liked
+}
+
+model Playlist {
+  id   String @id @default(uuid())
+  name String
+
+  entries PlaylistEntry[] @relation("PlaylistEntries")
+
+  owner   User   @relation("UserPlaylists", fields: [ownerId], references: [id])
+  ownerId String
+
+  type PlaylistType @default(Playlist)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PlaylistEntry {
+  id String @id @default(uuid())
+
+  playlist   Playlist @relation("PlaylistEntries", fields: [playlistId], references: [id])
+  playlistId String
+
+  recordingMbid String
+
+  order Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Friendship {
+  id String @id @default(uuid())
+
+  user1   User   @relation("UserFriendshipsOut", fields: [user1Id], references: [id])
+  user1Id String
+
+  user2   User   @relation("UserFriendshipsIn", fields: [user2Id], references: [id])
+  user2Id String
+
+  accepted Boolean
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

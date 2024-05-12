@@ -1,19 +1,24 @@
 import { createServer } from "node:http";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { createSchema, createYoga } from "graphql-yoga";
+import { YogaInitialContext, createSchema, createYoga } from "graphql-yoga";
 import { initContainer } from "./container";
 import {
   PlayRecordingInput,
   PlayRecordingResult,
   SearchRecordingsInput,
   SearchRecordingsResult,
+  SignUpByPasswordInput,
+  SignUpByPasswordResult,
 } from "./generated/graphql/types";
+import { useCookies } from "@whatwg-node/server-plugin-cookies";
 
 const typeDefs = readFileSync(
   resolve(__dirname, "../schema/graphql/schema.graphql"),
   "utf-8",
 );
+
+const SESSION_ID_COOKIE_NAME = "sessid";
 
 (async () => {
   const { cradle } = await initContainer();
@@ -35,10 +40,31 @@ const typeDefs = readFileSync(
           return await cradle.searchRecordings(input);
         },
       },
+      Mutation: {
+        async signUpByPassword(
+          _,
+          { input }: { input: SignUpByPasswordInput },
+          ctx: YogaInitialContext,
+        ): Promise<SignUpByPasswordResult> {
+          const { result, session } = await cradle.signUpByPassword(input);
+
+          if (session)
+            ctx.request.cookieStore?.set(
+              SESSION_ID_COOKIE_NAME,
+              session.sessionId,
+            );
+
+          return result;
+        },
+      },
     },
   });
 
-  const yoga = createYoga({ schema, landingPage: false });
+  const yoga = createYoga({
+    schema,
+    landingPage: false,
+    plugins: [useCookies()],
+  });
 
   const server = createServer(yoga);
 
