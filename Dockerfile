@@ -3,4 +3,4 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 RUN npm ci
 COPY . .
-CMD [ "npm", "start" ]
+CMD ["/bin/sh", "-c", "sleep 5s && npm run prisma:migrate-prod && npm run prisma:generate && npm start"]
