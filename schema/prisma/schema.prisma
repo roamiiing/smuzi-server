@@ -29,8 +29,9 @@ enum PlaylistType {
 }
 
 model Playlist {
-  id   String @id @default(uuid())
-  name String
+  id          String  @id @default(uuid())
+  name        String
+  description String?
 
   entries PlaylistEntry[] @relation("PlaylistEntries")
 

@@ -29,11 +29,48 @@ export enum ArtistType {
   Person = 'Person'
 }
 
+export type CreatePlaylistInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+};
+
 export type GetMeResult = GetMeResultSuccess | UnauthenticatedError;
 
 export type GetMeResultSuccess = {
   __typename?: 'GetMeResultSuccess';
   me: Me;
+};
+
+export type GetMyPlaylistsResult = {
+  __typename?: 'GetMyPlaylistsResult';
+  playlists?: Maybe<Array<PlaylistInfo>>;
+};
+
+export type GetPlaylistByIdInput = {
+  id: Scalars['String']['input'];
+};
+
+export type GetPlaylistByIdResult = {
+  __typename?: 'GetPlaylistByIdResult';
+  playlist?: Maybe<PlaylistInfo>;
+};
+
+export type GetPlaylistEntriesInput = {
+  playlistId: Scalars['String']['input'];
+};
+
+export type GetPlaylistEntriesResult = {
+  __typename?: 'GetPlaylistEntriesResult';
+  entries?: Maybe<Array<PlaylistEntry>>;
+};
+
+export type GetPublicPlaylistsInput = {
+  userId: Scalars['String']['input'];
+};
+
+export type GetPublicPlaylistsResult = {
+  __typename?: 'GetPublicPlaylistsResult';
+  playlists?: Maybe<Array<PlaylistInfo>>;
 };
 
 export type Me = {
@@ -44,6 +81,8 @@ export type Me = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  /** Create a new playlist */
+  createPlaylist: PlaylistInfo;
   /** Refresh a session */
   refreshSession: RefreshSessionResult;
   /** Sign in a user */
@@ -52,6 +91,11 @@ export type Mutation = {
   signOut: SignOutResult;
   /** Sign up a new user */
   signUpByPassword: SignUpByPasswordResult;
+};
+
+
+export type MutationCreatePlaylistArgs = {
+  input: CreatePlaylistInput;
 };
 
 
@@ -78,14 +122,66 @@ export type PlayRecordingResult = {
   streamUrl: Scalars['String']['output'];
 };
 
+export type PlaylistEntry = {
+  __typename?: 'PlaylistEntry';
+  id: Scalars['String']['output'];
+  order: Scalars['Int']['output'];
+  recording: Recording;
+};
+
+export type PlaylistInfo = {
+  __typename?: 'PlaylistInfo';
+  createdAt: Scalars['Date']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  owner: PlaylistOwner;
+  type: PlaylistType;
+  updatedAt: Scalars['Date']['output'];
+};
+
+export type PlaylistOwner = {
+  __typename?: 'PlaylistOwner';
+  id: Scalars['String']['output'];
+  username: Scalars['String']['output'];
+};
+
+export enum PlaylistType {
+  Liked = 'Liked',
+  Playlist = 'Playlist'
+}
+
 export type Query = {
   __typename?: 'Query';
   /** Get the current user */
   getMe?: Maybe<GetMeResult>;
+  /** Get current user's playlists (both public and private) */
+  getMyPlaylists?: Maybe<GetMyPlaylistsResult>;
+  /** Get playlist by id */
+  getPlaylistById?: Maybe<GetPlaylistByIdResult>;
+  /** Get playlist entries */
+  getPlaylistEntries?: Maybe<GetPlaylistEntriesResult>;
+  /** Get user's public playlists */
+  getPublicPlaylists?: Maybe<GetPublicPlaylistsResult>;
   /** Retrieve a URL to stream a recording */
   playRecording: PlayRecordingResult;
   /** Search for recordings */
   searchRecordings: SearchRecordingsResult;
+};
+
+
+export type QueryGetPlaylistByIdArgs = {
+  input: GetPlaylistByIdInput;
+};
+
+
+export type QueryGetPlaylistEntriesArgs = {
+  input: GetPlaylistEntriesInput;
+};
+
+
+export type QueryGetPublicPlaylistsArgs = {
+  input: GetPublicPlaylistsInput;
 };
 
 

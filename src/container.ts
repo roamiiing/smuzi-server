@@ -28,6 +28,9 @@ import { signUpByPassword } from "./controllers/sign-up-by-password";
 import { AuthService } from "./services/auth-service";
 import { SessionsRepository } from "./repositories/sessions-repository";
 import { signInByPassword } from "./controllers/sign-in-by-password";
+import { getPlaylistById } from "./controllers/get-playlist-by-id";
+import { getMyPlaylists } from "./controllers/get-my-playlists";
+import { getPublicPlaylists } from "./controllers/get-public-playlists";
 
 export type ContainerItems = {
   mongoClient: MongoClient;
@@ -42,6 +45,9 @@ export type ContainerItems = {
   playRecording: ReturnType<typeof playRecording>;
   signUpByPassword: ReturnType<typeof signUpByPassword>;
   signInByPassword: ReturnType<typeof signInByPassword>;
+  getPlaylistById: ReturnType<typeof getPlaylistById>;
+  getMyPlaylists: ReturnType<typeof getMyPlaylists>;
+  getPublicPlaylists: ReturnType<typeof getPublicPlaylists>;
 };
 
 export const initContainer = async (): Promise<
@@ -70,6 +76,9 @@ export const initContainer = async (): Promise<
     playRecording: asFunction(playRecording),
     signUpByPassword: asFunction(signUpByPassword),
     signInByPassword: asFunction(signInByPassword),
+    getPlaylistById: asFunction(getPlaylistById),
+    getMyPlaylists: asFunction(getMyPlaylists),
+    getPublicPlaylists: asFunction(getPublicPlaylists),
   });
 
   const { cradle } = container;

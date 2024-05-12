@@ -5,6 +5,11 @@ import { YogaInitialContext, createSchema, createYoga } from "graphql-yoga";
 import { useCookies } from "@whatwg-node/server-plugin-cookies";
 import { ContainerItems, initContainer } from "./container";
 import {
+  GetMyPlaylistsResult,
+  GetPlaylistByIdInput,
+  GetPlaylistByIdResult,
+  GetPublicPlaylistsInput,
+  GetPublicPlaylistsResult,
   PlayRecordingInput,
   PlayRecordingResult,
   RefreshSessionResult,
@@ -75,6 +80,34 @@ const tryRefreshSession = async (
         ): Promise<SearchRecordingsResult> {
           await tryRefreshSession(ctx, cradle);
           return await cradle.searchRecordings(input);
+        },
+        async getPlaylistById(
+          _,
+          { input }: { input: GetPlaylistByIdInput },
+          ctx: YogaInitialContext,
+        ): Promise<GetPlaylistByIdResult> {
+          await tryRefreshSession(ctx, cradle);
+          return await cradle.getPlaylistById(input);
+        },
+        async getMyPlaylists(
+          _,
+          __,
+          ctx: YogaInitialContext,
+        ): Promise<GetMyPlaylistsResult> {
+          const user = await tryRefreshSession(ctx, cradle);
+          console.log(user);
+
+          if (!user) return { playlists: null };
+
+          return await cradle.getMyPlaylists(user.id);
+        },
+        async getPublicPlaylists(
+          _,
+          { input }: { input: GetPublicPlaylistsInput },
+          ctx: YogaInitialContext,
+        ): Promise<GetPublicPlaylistsResult> {
+          await tryRefreshSession(ctx, cradle);
+          return await cradle.getPublicPlaylists(input.userId);
         },
       },
       Mutation: {

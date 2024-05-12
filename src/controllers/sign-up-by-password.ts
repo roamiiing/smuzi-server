@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PlaylistType, PrismaClient } from "@prisma/client";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { z } from "zod";
 import {
@@ -42,12 +42,29 @@ export const signUpByPassword =
     const { username, password } = parsed.data;
 
     try {
-      const user = await prismaClient.user.create({
-        data: {
-          username,
-          authSource: AuthSource.Password,
-          authParams: { password: await AuthService.hashPassword(password) },
-        },
+      const user = await prismaClient.$transaction(async () => {
+        const user = await prismaClient.user.create({
+          data: {
+            username,
+            authSource: AuthSource.Password,
+            authParams: { password: await AuthService.hashPassword(password) },
+          },
+        });
+
+        await prismaClient.playlist.create({
+          data: {
+            owner: {
+              connect: {
+                id: user.id,
+              },
+            },
+            name: "Liked Songs",
+            description: `${user.username}'s liked songs`,
+            type: PlaylistType.Liked,
+          },
+        });
+
+        return user;
       });
 
       return {

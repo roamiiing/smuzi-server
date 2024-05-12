@@ -156,6 +156,65 @@ type GetMeResultSuccess {
 
 union GetMeResult = UnauthenticatedError | GetMeResultSuccess
 
+enum PlaylistType {
+  Playlist
+  Liked
+}
+
+type PlaylistOwner {
+  id: String!
+  username: String!
+}
+
+type PlaylistInfo {
+  id: String!
+  name: String!
+  description: String
+  type: PlaylistType!
+  owner: PlaylistOwner!
+  createdAt: Date!
+  updatedAt: Date!
+}
+
+type PlaylistEntry {
+  id: String!
+  recording: Recording!
+  order: Int!
+}
+
+input CreatePlaylistInput {
+  name: String!
+  description: String
+}
+
+input GetPlaylistByIdInput {
+  id: String!
+}
+
+type GetPlaylistByIdResult {
+  playlist: PlaylistInfo
+}
+
+input GetPublicPlaylistsInput {
+  userId: String!
+}
+
+type GetPublicPlaylistsResult {
+  playlists: [PlaylistInfo!]
+}
+
+input GetPlaylistEntriesInput {
+  playlistId: String!
+}
+
+type GetPlaylistEntriesResult {
+  entries: [PlaylistEntry!]
+}
+
+type GetMyPlaylistsResult {
+  playlists: [PlaylistInfo!]
+}
+
 type Query {
   """
   Search for recordings
@@ -169,6 +228,22 @@ type Query {
   Get the current user
   """
   getMe: GetMeResult
+  """
+  Get playlist by id
+  """
+  getPlaylistById(input: GetPlaylistByIdInput!): GetPlaylistByIdResult
+  """
+  Get user's public playlists
+  """
+  getPublicPlaylists(input: GetPublicPlaylistsInput!): GetPublicPlaylistsResult
+  """
+  Get current user's playlists (both public and private)
+  """
+  getMyPlaylists: GetMyPlaylistsResult
+  """
+  Get playlist entries
+  """
+  getPlaylistEntries(input: GetPlaylistEntriesInput!): GetPlaylistEntriesResult
 }
 
 type Mutation {
@@ -188,6 +263,10 @@ type Mutation {
   Refresh a session
   """
   refreshSession: RefreshSessionResult!
+  """
+  Create a new playlist
+  """
+  createPlaylist(input: CreatePlaylistInput!): PlaylistInfo!
 }
 
 schema {
