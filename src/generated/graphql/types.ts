@@ -44,8 +44,19 @@ export type Me = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  /** Refresh a session */
+  refreshSession: RefreshSessionResult;
+  /** Sign in a user */
+  signInByPassword: SignInByPasswordResult;
+  /** Sign out a user */
+  signOut: SignOutResult;
   /** Sign up a new user */
   signUpByPassword: SignUpByPasswordResult;
+};
+
+
+export type MutationSignInByPasswordArgs = {
+  input: SignInByPasswordInput;
 };
 
 
@@ -140,6 +151,11 @@ export type RecordingReleaseArtistCredit = {
   name: Scalars['String']['output'];
 };
 
+export type RefreshSessionResult = {
+  __typename?: 'RefreshSessionResult';
+  success: Scalars['Boolean']['output'];
+};
+
 export enum ReleaseStatus {
   Bootleg = 'Bootleg',
   Cancelled = 'Cancelled',
@@ -157,6 +173,23 @@ export type SearchRecordingsInput = {
 export type SearchRecordingsResult = {
   __typename?: 'SearchRecordingsResult';
   recordings: Array<Recording>;
+};
+
+export type SignInByPasswordInput = {
+  password: Scalars['String']['input'];
+  username: Scalars['String']['input'];
+};
+
+export type SignInByPasswordResult = SignInByPasswordResultSuccess | UnauthenticatedError;
+
+export type SignInByPasswordResultSuccess = {
+  __typename?: 'SignInByPasswordResultSuccess';
+  me: Me;
+};
+
+export type SignOutResult = {
+  __typename?: 'SignOutResult';
+  success: Scalars['Boolean']['output'];
 };
 
 export type SignUpByPasswordInput = {

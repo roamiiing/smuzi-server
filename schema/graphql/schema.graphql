@@ -129,6 +129,27 @@ union SignUpByPasswordResult =
   | ValidationErrors
   | AlreadyExistsError
 
+type RefreshSessionResult {
+  success: Boolean!
+}
+
+type SignOutResult {
+  success: Boolean!
+}
+
+input SignInByPasswordInput {
+  username: String!
+  password: String!
+}
+
+type SignInByPasswordResultSuccess {
+  me: Me!
+}
+
+union SignInByPasswordResult =
+  | SignInByPasswordResultSuccess
+  | UnauthenticatedError
+
 type GetMeResultSuccess {
   me: Me!
 }
@@ -155,6 +176,18 @@ type Mutation {
   Sign up a new user
   """
   signUpByPassword(input: SignUpByPasswordInput!): SignUpByPasswordResult!
+  """
+  Sign in a user
+  """
+  signInByPassword(input: SignInByPasswordInput!): SignInByPasswordResult!
+  """
+  Sign out a user
+  """
+  signOut: SignOutResult!
+  """
+  Refresh a session
+  """
+  refreshSession: RefreshSessionResult!
 }
 
 schema {

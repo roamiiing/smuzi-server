@@ -3,9 +3,10 @@ import * as crypto from "node:crypto";
 import { PrismaClient, User } from "@prisma/client";
 import { Session } from "../models/session";
 import { SessionsRepository } from "../repositories/sessions-repository";
-import { DAYS } from "../shared/units";
+import { DAYS, HOURS } from "../shared/units";
 
 const SESSION_EXPIRES_MS = 10 * DAYS;
+const DO_NOT_REFRESH_SESSION_EXPIRES_MS = 2 * HOURS;
 
 export type AuthServiceDeps = {
   sessionsRepository: SessionsRepository;
@@ -40,6 +41,10 @@ export class AuthService {
     if (!session) return null;
     if (session.expiresUtc < nowUtc) return null;
 
+    if (session.expiresUtc - nowUtc < DO_NOT_REFRESH_SESSION_EXPIRES_MS) {
+      return session;
+    }
+
     await this.deps.sessionsRepository.delete(sessionId);
 
     return await this.initSession(session.userId, nowUtc);
@@ -57,6 +62,10 @@ export class AuthService {
     return await this.deps.prismaClient.user.findUnique({
       where: { id: session.userId },
     });
+  }
+
+  async deleteSession(sessionId: string): Promise<void> {
+    return await this.deps.sessionsRepository.delete(sessionId);
   }
 
   public static async verifyPassword(
