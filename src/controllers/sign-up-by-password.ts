@@ -42,8 +42,8 @@ export const signUpByPassword =
     const { username, password } = parsed.data;
 
     try {
-      const user = await prismaClient.$transaction(async () => {
-        const user = await prismaClient.user.create({
+      const user = await prismaClient.$transaction(async (transaction) => {
+        const user = await transaction.user.create({
           data: {
             username,
             authSource: AuthSource.Password,
@@ -51,7 +51,7 @@ export const signUpByPassword =
           },
         });
 
-        await prismaClient.playlist.create({
+        await transaction.playlist.create({
           data: {
             owner: {
               connect: {
